@@ -1,6 +1,6 @@
 package com.samchendev.blecompose.bleConnect
 
-import com.samchendev.blecompose.managers.ConnectionState
+import com.samchendev.blecompose.ble.ConnectionState
 
 data class BleConnectUiState(
     val deviceName: String?,

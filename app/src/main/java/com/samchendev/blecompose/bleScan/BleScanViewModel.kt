@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.utlikotlin.toStateFlow
-import com.samchendev.blecompose.managers.BleManager
+import com.samchendev.blecompose.ble.BleManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 
