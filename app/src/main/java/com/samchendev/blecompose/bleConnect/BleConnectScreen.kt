@@ -23,7 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.utlikotlin.Button
 import com.example.utlikotlin.IconButton
 import com.samchendev.blecompose.R
-import com.samchendev.blecompose.managers.ConnectionState
+import com.samchendev.blecompose.ble.ConnectionState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

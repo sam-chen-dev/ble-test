@@ -6,8 +6,8 @@ import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.utlikotlin.toStateFlow
-import com.samchendev.blecompose.managers.BleConnectManager
-import com.samchendev.blecompose.managers.ConnectionState
+import com.samchendev.blecompose.ble.BleConnectManager
+import com.samchendev.blecompose.ble.ConnectionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 

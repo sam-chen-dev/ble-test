@@ -1,4 +1,4 @@
-package com.samchendev.blecompose.managers
+package com.samchendev.blecompose.ble
 
 import android.bluetooth.BluetoothDevice
 
