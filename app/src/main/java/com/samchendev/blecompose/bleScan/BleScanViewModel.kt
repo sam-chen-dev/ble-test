@@ -18,10 +18,6 @@ class BleScanViewModel(
         uiState.copy(scannedDevices = scannedDevices)
     }.toStateFlow(uiScope, createUiState())
 
-    init {
-
-    }
-
     private fun createUiState(): BleScanUiState = BleScanUiState(
         scannedDevices = emptyList(),
         onStartScanTrigger = ::startScan,
