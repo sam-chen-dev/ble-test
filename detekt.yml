@@ -1,7 +1,7 @@
 complexity:
   LargeClass:
     active: true
-    threshold: 50       # max lines per class
+    threshold: 50        # max lines per class
   LongMethod:
     active: true
     threshold: 60        # Compose functions are inherently longer
