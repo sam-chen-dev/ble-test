@@ -26,13 +26,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is an Android BLE (Bluetooth Low Energy) scanner and connector app built with Jetpack Compose.
 
 **Layer structure:**
+- `ble/` — Single BLE stack: `BleController` (interface for both scan and GATT) → `BleControllerImpl` (Android BLE scan API + `BluetoothGatt`) → `BleManager` (deduplicates scan results, exposes `StateFlow<List<BluetoothDevice>>` and `StateFlow<ConnectionState>`). `ConnectionState` enum is a standalone file in this package.
 - `di/` — Single Koin `appModule` wiring all singletons and ViewModels
-- `managers/` — Two independent BLE stacks:
-  - Scan: `BleController` (interface) → `BleControllerImpl` (Android BLE scan API) → `BleManager` (deduplicates results, exposes `StateFlow<List<BluetoothDevice>>`)
-  - Connect: `GattController` (interface, also defines `ConnectionState` enum) → `GattControllerImpl` (`BluetoothGatt` + `BluetoothGattCallback`) → `BleConnectManager` (thin wrapper, exposes `connectionState` flow)
 - `bleScan/` — Scan feature: list scanned devices, tap to navigate to connect screen
-- `bleConnect/` — Connect feature: shows device address/status, Connect/Disconnect buttons; `BleConnectViewModel` receives `deviceAddress` and `deviceName` via Koin `parametersOf`; calls `BleConnectManager.close()` in `onCleared()`
-- `navigation/` — Navigation3 setup: `AppNav.kt` defines `NavKey` types and `EntryProviderScope` extension functions; `NavDisplay.kt` wires the back stack with slide transitions
+- `bleConnect/` — Connect feature: shows device address/status, Connect/Disconnect buttons; `BleConnectViewModel` receives `deviceAddress` and `deviceName` via Koin `parametersOf`; calls `bleManager.closeGatt()` in `onCleared()`
+- `navigation/` — Navigation3 setup: `AppNav.kt` defines `NavKey` types (`BleScan`, `BleConnect`) and `EntryProviderScope` extension functions; `NavDisplay.kt` wires the back stack with slide transitions
 
 **Key patterns:**
 - UiState data classes carry action lambdas (`onConnectTrigger`, `onDisconnectTrigger`, etc.) so screens call `uiState.onXxx()` directly
@@ -45,7 +43,7 @@ This is an Android BLE (Bluetooth Low Energy) scanner and connector app built wi
 
 **BLE notes:**
 - `BleControllerImpl` hard-filters by `TARGET_ADDRESS = "DD:88:00:00:09:3D"` — remove or parameterise to scan all devices
-- `GattControllerImpl.close()` calls both `disconnect()` and `close()` on the `BluetoothGatt` immediately; this is safe because it's only called from `onCleared()`
+- `BleControllerImpl.closeGatt()` calls both `disconnect()` and `close()` on the `BluetoothGatt` immediately; `BleManager.closeGatt()` also resets `connectionState` to `DISCONNECTED`
 - `BLUETOOTH_CONNECT` / `BLUETOOTH_SCAN` permissions are requested in `BleScanScreen` before scanning; the connect screen assumes they're already granted
 
 **Permission chain in `BleScanScreen`:** Bluetooth permission → Location permission → Enable Bluetooth → Enable GPS → start scan. All helpers (`isBluetoothPermissionGranted`, `launchBluetoothPermission`, etc.) come from `util-kotlin`.
