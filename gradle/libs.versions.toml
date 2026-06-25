@@ -1,5 +1,6 @@
 [versions]
 agp = "9.2.1"
+detekt = "1.23.8"
 coreKtx = "1.19.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -36,5 +37,6 @@ util-kotlin = { module = "com.github.sam-chen-dev:util-kotlin", version.ref = "u
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
