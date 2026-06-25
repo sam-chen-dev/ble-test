@@ -1,0 +1,33 @@
+complexity:
+  LargeClass:
+    active: true
+    threshold: 50       # max lines per class
+  LongMethod:
+    active: true
+    threshold: 60        # Compose functions are inherently longer
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 6
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 15
+    thresholdInClasses: 11
+    thresholdInInterfaces: 11
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'     # Compose convention uses PascalCase
+
+style:
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  MagicNumber:
+    active: false        # Compose dp/sp values produce too many false positives
+  NewLineAtEndOfFile:
+    active: false        # cosmetic; not enforced in this project
+  UnusedPrivateMember:
+    ignoreAnnotated:
+      - 'Preview'        # @Preview composables are used by the IDE, not at runtime
