@@ -56,7 +56,7 @@ private fun BleConnectContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             LabeledValue("Address", uiState.deviceAddress)
-            LabeledValue("Status", uiState.connectionState.label())
+            LabeledValue("Status", uiState.connectionState.label)
 
             Spacer(Modifier.weight(1f))
 
@@ -65,14 +65,14 @@ private fun BleConnectContent(
                     text = "Connect",
                     onClick = uiState.onConnectTrigger,
                     modifier = Modifier.weight(1f),
-                    isEnabled = uiState.connectionState == ConnectionState.Disconnected
+                    isEnabled = uiState.connectionState == ConnectionState.DISCONNECTED
                 )
                 Spacer(Modifier.width(16.dp))
                 Button(
                     text = "Disconnect",
                     onClick = uiState.onDisconnectTrigger,
                     modifier = Modifier.weight(1f),
-                    isEnabled = uiState.connectionState == ConnectionState.Connected
+                    isEnabled = uiState.connectionState == ConnectionState.CONNECTED
                 )
             }
         }
@@ -102,12 +102,6 @@ private fun LabeledValue(label: String, value: String) {
     }
 }
 
-private fun ConnectionState.label() = when (this) {
-    ConnectionState.Disconnected -> "Disconnected"
-    ConnectionState.Connecting -> "Connecting..."
-    ConnectionState.Connected -> "Connected"
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun BleConnectContentPreview() {
@@ -115,7 +109,7 @@ private fun BleConnectContentPreview() {
         uiState = BleConnectUiState(
             deviceName = "My BLE Device",
             deviceAddress = "DD:88:00:00:09:3D",
-            connectionState = ConnectionState.Disconnected,
+            connectionState = ConnectionState.DISCONNECTED,
             onConnectTrigger = {},
             onDisconnectTrigger = {}
         ),
