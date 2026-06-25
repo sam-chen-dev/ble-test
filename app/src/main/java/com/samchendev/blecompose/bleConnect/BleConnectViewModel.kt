@@ -1,12 +1,9 @@
 package com.samchendev.blecompose.bleConnect
 
-import android.Manifest
-import android.bluetooth.BluetoothManager
-import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.utlikotlin.toStateFlow
-import com.samchendev.blecompose.ble.BleConnectManager
+import com.samchendev.blecompose.ble.BleManager
 import com.samchendev.blecompose.ble.ConnectionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -14,38 +11,28 @@ import kotlinx.coroutines.flow.combine
 class BleConnectViewModel(
     private val deviceAddress: String,
     private val deviceName: String?,
-    private val bluetoothManager: BluetoothManager,
-    private val bleConnectManager: BleConnectManager
+    private val bleManager: BleManager
 ) : ViewModel() {
     private val uiScope = viewModelScope
-    private val _uiState = MutableStateFlow(createUiState(ConnectionState.Disconnected))
+    private val _uiState = MutableStateFlow(createUiState())
 
-    val uiState = combine(bleConnectManager.connectionState, _uiState) { connectionState, uiState ->
+    val uiState = combine(bleManager.connectionState, _uiState) { connectionState, uiState ->
         uiState.copy(connectionState = connectionState)
-    }.toStateFlow(uiScope, createUiState(ConnectionState.Disconnected))
+    }.toStateFlow(uiScope, createUiState())
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun onCleared() {
-        super.onCleared()
-        bleConnectManager.close()
-    }
-
-    private fun createUiState(connectionState: ConnectionState) = BleConnectUiState(
+    private fun createUiState(): BleConnectUiState = BleConnectUiState(
         deviceName = deviceName,
         deviceAddress = deviceAddress,
-        connectionState = connectionState,
+        connectionState = ConnectionState.DISCONNECTED,
         onConnectTrigger = ::connect,
         onDisconnectTrigger = ::disconnect
     )
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun connect() {
-        val device = bluetoothManager.adapter.getRemoteDevice(deviceAddress)
-        bleConnectManager.connect(device)
-    }
+    private fun connect() = bleManager.connect(deviceAddress)
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun disconnect() {
-        bleConnectManager.disconnect()
+    private fun disconnect() = bleManager.disconnect()
+
+    override fun onCleared() {
+        bleManager.closeGatt()
     }
 }
