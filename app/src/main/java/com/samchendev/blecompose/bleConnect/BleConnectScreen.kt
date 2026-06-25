@@ -33,9 +33,7 @@ fun BleConnectScreen(
     deviceName: String?,
     onBack: () -> Unit
 ) {
-    val viewModel: BleConnectViewModel = koinViewModel(
-        parameters = { parametersOf(deviceAddress, deviceName) }
-    )
+    val viewModel: BleConnectViewModel = koinViewModel(parameters = { parametersOf(deviceAddress, deviceName) })
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     BleConnectContent(uiState, onBack)
