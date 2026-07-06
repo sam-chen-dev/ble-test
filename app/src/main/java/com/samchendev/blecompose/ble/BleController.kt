@@ -7,7 +7,11 @@ interface BleController {
 
     fun stopScan()
 
-    fun connect(address: String, onConnectionStateChanged: (ConnectionState) -> Unit)
+    fun connect(
+        address: String,
+        onConnectionStateChanged: (ConnectionState) -> Unit,
+        onServicesDiscovered: (List<GattService>) -> Unit
+    )
 
     fun disconnect()
 
