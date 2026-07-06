@@ -16,14 +16,19 @@ class BleConnectViewModel(
     private val uiScope = viewModelScope
     private val _uiState = MutableStateFlow(createUiState())
 
-    val uiState = combine(bleManager.connectionState, _uiState) { connectionState, uiState ->
-        uiState.copy(connectionState = connectionState)
+    val uiState = combine(
+        bleManager.connectionState,
+        bleManager.discoveredServices,
+        _uiState
+    ) { connectionState, services, uiState ->
+        uiState.copy(connectionState = connectionState, services = services)
     }.toStateFlow(uiScope, createUiState())
 
     private fun createUiState(): BleConnectUiState = BleConnectUiState(
         deviceName = deviceName,
         deviceAddress = deviceAddress,
         connectionState = ConnectionState.DISCONNECTED,
+        services = emptyList(),
         onConnectTrigger = ::connect,
         onDisconnectTrigger = ::disconnect
     )
