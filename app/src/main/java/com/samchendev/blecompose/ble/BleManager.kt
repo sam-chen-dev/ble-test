@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.update
 class BleManager(private val bleController: BleController) {
     private val _scannedDevices = MutableStateFlow<List<BluetoothDevice>>(emptyList())
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    private val _discoveredServices = MutableStateFlow<List<GattService>>(emptyList())
 
     val scannedDevices = _scannedDevices.asStateFlow()
     val connectionState = _connectionState.asStateFlow()
+    val discoveredServices = _discoveredServices.asStateFlow()
 
     /*Scan*/
     fun startScan() = bleController.startScan { device -> updateScannedDevices(device) }
@@ -27,7 +29,11 @@ class BleManager(private val bleController: BleController) {
     fun connect(address: String) {
         updateConnectionState(ConnectionState.CONNECTING)
 
-        bleController.connect(address) { state -> updateConnectionState(state) }
+        bleController.connect(
+            address,
+            ::updateConnectionState,
+            ::updateDiscoveredServices
+        )
     }
 
     fun disconnect() = bleController.disconnect()
@@ -36,7 +42,9 @@ class BleManager(private val bleController: BleController) {
         bleController.closeGatt()
 
         updateConnectionState(ConnectionState.DISCONNECTED)
+        updateDiscoveredServices(emptyList())
     }
 
     private fun updateConnectionState(newState: ConnectionState) = _connectionState.update { newState }
+    private fun updateDiscoveredServices(services: List<GattService>) = _discoveredServices.update { services }
 }
