@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -16,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,8 +29,12 @@ import com.example.utlikotlin.Button
 import com.example.utlikotlin.IconButton
 import com.samchendev.blecompose.R
 import com.samchendev.blecompose.ble.ConnectionState
+import com.samchendev.blecompose.ble.GattCharacteristic
+import com.samchendev.blecompose.ble.GattService
+import com.samchendev.blecompose.ble.toDisplayString
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.util.UUID
 
 @Composable
 fun BleConnectScreen(
@@ -48,15 +57,11 @@ private fun BleConnectContent(
         Toolbar(uiState.deviceName ?: uiState.deviceAddress, onBack)
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             LabeledValue("Address", uiState.deviceAddress)
             LabeledValue("Status", uiState.connectionState.label)
-
-            Spacer(Modifier.weight(1f))
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
@@ -65,7 +70,9 @@ private fun BleConnectContent(
                     modifier = Modifier.weight(1f),
                     isEnabled = uiState.connectionState == ConnectionState.DISCONNECTED
                 )
+
                 Spacer(Modifier.width(16.dp))
+
                 Button(
                     text = "Disconnect",
                     onClick = uiState.onDisconnectTrigger,
@@ -74,6 +81,62 @@ private fun BleConnectContent(
                 )
             }
         }
+
+        if (uiState.services.isNotEmpty()) {
+            ServicesList(uiState.services)
+        }
+    }
+}
+
+@Composable
+private fun ServicesList(services: List<GattService>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Text("Services", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+        }
+
+        itemsIndexed(services) { index, service ->
+            ServiceItem(service)
+
+            if (index < services.lastIndex) {
+                HorizontalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServiceItem(service: GattService) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(service.uuid.toDisplayString(), fontWeight = FontWeight.Medium, fontSize = 13.sp)
+
+        service.characteristics.forEach {
+            CharacteristicItem(it)
+        }
+    }
+}
+
+@Composable
+private fun CharacteristicItem(characteristic: GattCharacteristic) {
+    Column(
+        modifier = Modifier.padding(start = 12.dp),
+    ) {
+        Text(characteristic.uuid.toDisplayString(), fontSize = 12.sp)
+        Text(
+            characteristic.properties.joinToString(" · "),
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -107,7 +170,18 @@ private fun BleConnectContentPreview() {
         uiState = BleConnectUiState(
             deviceName = "My BLE Device",
             deviceAddress = "DD:88:00:00:09:3D",
-            connectionState = ConnectionState.DISCONNECTED,
+            connectionState = ConnectionState.CONNECTED,
+            services = listOf(
+                GattService(
+                    uuid = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb"),
+                    characteristics = listOf(
+                        GattCharacteristic(
+                            uuid = UUID.fromString("00002a29-0000-1000-8000-00805f9b34fb"),
+                            properties = listOf("READ • WRITE")
+                        )
+                    )
+                )
+            ),
             onConnectTrigger = {},
             onDisconnectTrigger = {}
         ),
