@@ -30,9 +30,9 @@ class BleManager(private val bleController: BleController) {
         updateConnectionState(ConnectionState.CONNECTING)
 
         bleController.connect(
-            address,
-            ::updateConnectionState,
-            ::updateDiscoveredServices
+            address = address,
+            onConnectionStateChanged = { state -> updateConnectionState(state) },
+            onServicesDiscovered = { services -> updateDiscoveredServices(services) }
         )
     }
 
