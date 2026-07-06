@@ -118,9 +118,9 @@ private fun BleScanContent(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Button("Scan", onScanClick, modifier = Modifier.weight(1F))
+                Button("Scan", onScanClick, modifier = Modifier.weight(1f))
                 Spacer(Modifier.width(16.dp))
-                Button("Stop", uiState.onStopScanTrigger, modifier = Modifier.weight(1F))
+                Button("Stop", uiState.onStopScanTrigger, modifier = Modifier.weight(1f))
             }
         }
     }
