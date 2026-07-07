@@ -10,13 +10,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -118,9 +123,16 @@ private fun BleScanContent(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Button("Scan", onScanClick, modifier = Modifier.weight(1f))
+                ScanButton(onScanClick, uiState.isScanning)
+
                 Spacer(Modifier.width(16.dp))
-                Button("Stop", uiState.onStopScanTrigger, modifier = Modifier.weight(1f))
+
+                Button(
+                    text = "Stop",
+                    onClick = uiState.onStopScanTrigger,
+                    isEnabled = uiState.isScanning,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -138,6 +150,27 @@ private fun Toolbar() {
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
+}
+
+@Composable
+private fun RowScope.ScanButton(onClick: () -> Unit, isScanning: Boolean) {
+    Button(
+        onClick = onClick,
+        enabled = !isScanning,
+        modifier = Modifier.weight(1f)
+    ) {
+        if (isScanning) {
+            Row(
+                verticalAlignment = CenterVertically
+            ) {
+                CircularProgressIndicator(Modifier.size(16.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Scanning...")
+            }
+        } else {
+            Text("Scan")
+        }
+    }
 }
 
 @Composable
@@ -174,6 +207,7 @@ private fun BleScanContentPreview() {
     BleScanContent(
         uiState = BleScanUiState(
             scannedDevices = emptyList(),
+            isScanning = false,
             onStartScanTrigger = { },
             onStopScanTrigger = { }
         ),
