@@ -29,7 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -161,7 +161,7 @@ private fun RowScope.ScanButton(onClick: () -> Unit, isScanning: Boolean) {
     ) {
         if (isScanning) {
             Row(
-                verticalAlignment = CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 CircularProgressIndicator(Modifier.size(16.dp))
                 Spacer(Modifier.width(8.dp))
