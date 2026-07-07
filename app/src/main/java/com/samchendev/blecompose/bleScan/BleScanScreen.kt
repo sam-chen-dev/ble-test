@@ -103,7 +103,7 @@ fun BleScanScreen(onDeviceClick: (BluetoothDevice) -> Unit = {}) {
 }
 
 @Composable
-private fun BleScanContent(
+fun BleScanContent(
     uiState: BleScanUiState,
     onScanClick: () -> Unit,
     onDeviceClick: (BluetoothDevice) -> Unit,
