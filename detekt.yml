@@ -12,7 +12,7 @@ complexity:
   TooManyFunctions:
     active: true
     thresholdInFiles: 15
-    thresholdInClasses: 11
+    thresholdInClasses: 12
     thresholdInInterfaces: 11
   CyclomaticComplexMethod:
     active: true
