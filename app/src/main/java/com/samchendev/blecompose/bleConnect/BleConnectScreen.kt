@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -146,21 +148,27 @@ private fun ServiceItem(service: GattService) {
 
         service.characteristics.forEach {
             CharacteristicItem(it)
+            Spacer(Modifier.height(0.dp))
         }
     }
 }
 
 @Composable
 private fun CharacteristicItem(characteristic: GattCharacteristic) {
-    Column(
-        modifier = Modifier.padding(start = 12.dp),
+    Card(
+        onClick = {},
+        modifier = Modifier.padding(start = 12.dp)
     ) {
-        Text(characteristic.uuid.toDisplayString(), fontSize = 12.sp)
-        Text(
-            characteristic.properties.joinToString(" · "),
-            fontSize = 11.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            Text(characteristic.uuid.toDisplayString(), fontSize = 12.sp)
+            Text(
+                characteristic.properties.joinToString(" · "),
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
