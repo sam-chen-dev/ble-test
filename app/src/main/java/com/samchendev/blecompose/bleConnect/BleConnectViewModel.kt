@@ -7,6 +7,7 @@ import com.samchendev.blecompose.ble.BleManager
 import com.samchendev.blecompose.ble.ConnectionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import java.util.UUID
 
 class BleConnectViewModel(
     private val deviceAddress: String,
@@ -19,9 +20,14 @@ class BleConnectViewModel(
     val uiState = combine(
         bleManager.connectionState,
         bleManager.discoveredServices,
+        bleManager.characteristicValues,
         _uiState
-    ) { connectionState, services, uiState ->
-        uiState.copy(connectionState = connectionState, services = services)
+    ) { connectionState, services, characteristicValues, uiState ->
+        uiState.copy(
+            connectionState = connectionState,
+            services = services,
+            characteristicValues = characteristicValues
+        )
     }.toStateFlow(uiScope, createUiState())
 
     private fun createUiState(): BleConnectUiState = BleConnectUiState(
@@ -29,13 +35,18 @@ class BleConnectViewModel(
         deviceAddress = deviceAddress,
         connectionState = ConnectionState.DISCONNECTED,
         services = emptyList(),
+        characteristicValues = emptyMap(),
         onConnectTrigger = ::connect,
-        onDisconnectTrigger = ::disconnect
+        onDisconnectTrigger = ::disconnect,
+        onCharacteristicClick = ::readCharacteristic
     )
 
     private fun connect() = bleManager.connect(deviceAddress)
 
     private fun disconnect() = bleManager.disconnect()
+
+    private fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID) =
+        bleManager.readCharacteristic(serviceUuid, characteristicUuid)
 
     override fun onCleared() {
         bleManager.closeGatt()
