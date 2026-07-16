@@ -37,8 +37,8 @@ import com.samchendev.blecompose.R
 import com.samchendev.blecompose.ble.ConnectionState
 import com.samchendev.blecompose.ble.GattCharacteristic
 import com.samchendev.blecompose.ble.GattService
-import com.samchendev.blecompose.ble.toDisplayString
-import com.samchendev.blecompose.ble.toFloat
+import com.samchendev.blecompose.ble.toBleUuid
+import com.samchendev.blecompose.ble.toDescriptiveText
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import java.util.UUID
@@ -153,7 +153,7 @@ private fun ServiceItem(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(service.uuid.toDisplayString(), fontWeight = FontWeight.Medium, fontSize = 13.sp)
+        Text(service.uuid.toBleUuid().toDescriptiveText(), fontWeight = FontWeight.Medium, fontSize = 13.sp)
 
         service.characteristics.forEach { characteristic ->
             CharacteristicItem(
@@ -182,7 +182,7 @@ private fun CharacteristicItem(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
-            Text(characteristic.uuid.toDisplayString(), fontSize = 12.sp)
+            Text(characteristic.uuid.toBleUuid().toDescriptiveText(), fontSize = 12.sp)
             Text(
                 characteristic.properties.joinToString(" · "),
                 fontSize = 11.sp,
@@ -191,9 +191,7 @@ private fun CharacteristicItem(
 
             if (value != null) {
                 Text(
-                    //"Value: ${value.toHexString()}",
-                    "Value: ${value.toFloat()}",
-                    //"Value: ${value.toString(Charsets.UTF_8)}",
+                    "Value: ${characteristic.getFormattedValue(value)}",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary
