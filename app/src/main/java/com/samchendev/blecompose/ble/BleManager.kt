@@ -58,5 +58,4 @@ class BleManager(private val bleController: BleController) {
     private fun updateDiscoveredServices(services: List<GattService>) = _discoveredServices.update { services }
     private fun updateCharacteristicValue(uuid: UUID, value: ByteArray) =
         _characteristicValues.update { it + (uuid to value) }
-
 }
