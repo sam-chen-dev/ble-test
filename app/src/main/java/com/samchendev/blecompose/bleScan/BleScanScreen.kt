@@ -195,7 +195,7 @@ private fun BleDeviceListItem(bleDevice: BluetoothDevice, onDeviceClick: (Blueto
             .clickable { onDeviceClick(bleDevice) }
             .padding(16.dp),
     ) {
-        Text(bleDevice.name, fontSize = 15.sp)
+        Text(bleDevice.name ?: "(no name)", fontSize = 15.sp)
         Spacer(Modifier.weight(1F))
         Text(bleDevice.address, fontSize = 15.sp)
     }
