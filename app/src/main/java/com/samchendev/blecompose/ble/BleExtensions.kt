@@ -1,5 +1,7 @@
 package com.samchendev.blecompose.ble
 
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 
 fun UUID.toDisplayString(): String {
@@ -34,3 +36,11 @@ fun String.toDescriptiveText() = when (this) {
     "0xFE59" -> "Nordic Secure Device Firmware Update"
     else -> this
 }
+
+fun ByteArray.toFloat(): Float {
+    val byteOrder = ByteOrder.LITTLE_ENDIAN
+
+    return ByteBuffer.wrap(this).order(byteOrder).float
+}
+
+//fun ByteArray.toHexString() = joinToString(" ") { "%02X".format(it) }
