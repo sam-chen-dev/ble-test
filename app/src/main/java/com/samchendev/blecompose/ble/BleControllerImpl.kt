@@ -13,10 +13,12 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import androidx.annotation.RequiresPermission
+import java.util.UUID
 
 class BleControllerImpl(context: Context) : BleController {
     companion object {
-        private const val TARGET_ADDRESS = "DD:88:00:00:09:3D"
+        //private const val TARGET_ADDRESS = "DD:88:00:00:09:3D"
+        private const val TARGET_ADDRESS = "D0:AB:58:F0:29:DB"
     }
 
     private val applicationContext = context.applicationContext
@@ -53,11 +55,12 @@ class BleControllerImpl(context: Context) : BleController {
     override fun connect(
         address: String,
         onConnectionStateChanged: (ConnectionState) -> Unit,
-        onServicesDiscovered: (List<GattService>) -> Unit
+        onServicesDiscovered: (List<GattService>) -> Unit,
+        onCharacteristicRead: (UUID, ByteArray) -> Unit
     ) {
         val device = bleManager.adapter.getRemoteDevice(address)
 
-        gattCallback = createGattCallback(onConnectionStateChanged, onServicesDiscovered)
+        gattCallback = createGattCallback(onConnectionStateChanged, onServicesDiscovered, onCharacteristicRead)
         gatt = device.connectGatt(applicationContext, false, gattCallback)
     }
 
@@ -76,7 +79,8 @@ class BleControllerImpl(context: Context) : BleController {
     @SuppressLint("MissingPermission")
     private fun createGattCallback(
         onConnectionStateChanged: (ConnectionState) -> Unit,
-        onServicesDiscovered: (List<GattService>) -> Unit
+        onServicesDiscovered: (List<GattService>) -> Unit,
+        onCharacteristicRead: (UUID, ByteArray) -> Unit
     ) = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             when (newState) {
@@ -94,6 +98,17 @@ class BleControllerImpl(context: Context) : BleController {
             if (status != BluetoothGatt.GATT_SUCCESS) return
 
             onServicesDiscovered(gatt.services.map { it.toGattService() })
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray,
+            status: Int
+        ) {
+            if (status != BluetoothGatt.GATT_SUCCESS) return
+
+            onCharacteristicRead(characteristic.uuid, value)
         }
     }
 
@@ -114,5 +129,13 @@ class BleControllerImpl(context: Context) : BleController {
         if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) add("WRITE NO RSP")
         if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) add("NOTIFY")
         if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) add("INDICATE")
+    }
+
+    /*Read Characteristic*/
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID) {
+        val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid) ?: return
+
+        gatt?.readCharacteristic(characteristic)
     }
 }
