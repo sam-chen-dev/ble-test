@@ -38,6 +38,7 @@ import com.samchendev.blecompose.ble.ConnectionState
 import com.samchendev.blecompose.ble.GattCharacteristic
 import com.samchendev.blecompose.ble.GattService
 import com.samchendev.blecompose.ble.toDisplayString
+import com.samchendev.blecompose.ble.toFloat
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import java.util.UUID
@@ -84,7 +85,7 @@ private fun BleConnectContent(
         }
 
         if (uiState.services.isNotEmpty()) {
-            ServicesList(uiState.services)
+            ServicesList(uiState.services, uiState.characteristicValues, uiState.onCharacteristicClick)
         }
     }
 }
@@ -115,7 +116,11 @@ private fun RowScope.ConnectButton(onClick: () -> Unit, state: ConnectionState) 
 }
 
 @Composable
-private fun ServicesList(services: List<GattService>) {
+private fun ServicesList(
+    services: List<GattService>,
+    characteristicValues: Map<UUID, ByteArray>,
+    onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -127,7 +132,7 @@ private fun ServicesList(services: List<GattService>) {
         }
 
         itemsIndexed(services) { index, service ->
-            ServiceItem(service)
+            ServiceItem(service, characteristicValues, onCharacteristicClick)
 
             if (index < services.lastIndex) {
                 HorizontalDivider()
@@ -137,7 +142,11 @@ private fun ServicesList(services: List<GattService>) {
 }
 
 @Composable
-private fun ServiceItem(service: GattService) {
+private fun ServiceItem(
+    service: GattService,
+    characteristicValues: Map<UUID, ByteArray>,
+    onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -146,17 +155,28 @@ private fun ServiceItem(service: GattService) {
     ) {
         Text(service.uuid.toDisplayString(), fontWeight = FontWeight.Medium, fontSize = 13.sp)
 
-        service.characteristics.forEach {
-            CharacteristicItem(it)
+        service.characteristics.forEach { characteristic ->
+            CharacteristicItem(
+                characteristic = characteristic,
+                value = characteristicValues[characteristic.uuid],
+                onClick = { onCharacteristicClick(service.uuid, characteristic.uuid) }
+            )
             Spacer(Modifier.height(0.dp))
         }
     }
 }
 
 @Composable
-private fun CharacteristicItem(characteristic: GattCharacteristic) {
+private fun CharacteristicItem(
+    characteristic: GattCharacteristic,
+    value: ByteArray?,
+    onClick: () -> Unit
+) {
+    val isReadable = characteristic.properties.contains("READ")
+
     Card(
-        onClick = {},
+        onClick = onClick,
+        enabled = isReadable,
         modifier = Modifier.padding(start = 12.dp)
     ) {
         Column(
@@ -168,6 +188,17 @@ private fun CharacteristicItem(characteristic: GattCharacteristic) {
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            if (value != null) {
+                Text(
+                    //"Value: ${value.toHexString()}",
+                    "Value: ${value.toFloat()}",
+                    //"Value: ${value.toString(Charsets.UTF_8)}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -214,8 +245,10 @@ private fun BleConnectContentPreview() {
                     )
                 )
             ),
+            characteristicValues = emptyMap(),
             onConnectTrigger = {},
-            onDisconnectTrigger = {}
+            onDisconnectTrigger = {},
+            onCharacteristicClick = { _, _ -> }
         ),
         onBack = {}
     )
