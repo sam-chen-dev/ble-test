@@ -4,15 +4,18 @@ import android.bluetooth.BluetoothDevice
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.UUID
 
 class BleManager(private val bleController: BleController) {
     private val _scannedDevices = MutableStateFlow<List<BluetoothDevice>>(emptyList())
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     private val _discoveredServices = MutableStateFlow<List<GattService>>(emptyList())
+    private val _characteristicValues = MutableStateFlow<Map<UUID, ByteArray>>(emptyMap())
 
     val scannedDevices = _scannedDevices.asStateFlow()
     val connectionState = _connectionState.asStateFlow()
     val discoveredServices = _discoveredServices.asStateFlow()
+    val characteristicValues = _characteristicValues.asStateFlow()
 
     /*Scan*/
     fun startScan() = bleController.startScan { device -> updateScannedDevices(device) }
@@ -32,7 +35,8 @@ class BleManager(private val bleController: BleController) {
         bleController.connect(
             address = address,
             onConnectionStateChanged = { state -> updateConnectionState(state) },
-            onServicesDiscovered = { services -> updateDiscoveredServices(services) }
+            onServicesDiscovered = { services -> updateDiscoveredServices(services) },
+            onCharacteristicRead = { uuid, value -> updateCharacteristicValue(uuid, value) }
         )
     }
 
@@ -43,8 +47,16 @@ class BleManager(private val bleController: BleController) {
 
         updateConnectionState(ConnectionState.DISCONNECTED)
         updateDiscoveredServices(emptyList())
+        _characteristicValues.update { emptyMap() }
     }
+
+    /*Read Characteristic*/
+    fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID) =
+        bleController.readCharacteristic(serviceUuid, characteristicUuid)
 
     private fun updateConnectionState(newState: ConnectionState) = _connectionState.update { newState }
     private fun updateDiscoveredServices(services: List<GattService>) = _discoveredServices.update { services }
+    private fun updateCharacteristicValue(uuid: UUID, value: ByteArray) =
+        _characteristicValues.update { it + (uuid to value) }
+
 }
