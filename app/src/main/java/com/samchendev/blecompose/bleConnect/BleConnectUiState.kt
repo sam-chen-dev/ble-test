@@ -10,7 +10,9 @@ data class BleConnectUiState(
     val connectionState: ConnectionState,
     val services: List<GattService>,
     val characteristicValues: Map<UUID, ByteArray>,
+    val notifyingCharacteristics: Set<UUID>,
     val onConnectTrigger: () -> Unit,
     val onDisconnectTrigger: () -> Unit,
-    val onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit
+    val onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit,
+    val onCharacteristicNotifyToggle: (serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) -> Unit
 )
