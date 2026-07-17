@@ -21,12 +21,14 @@ class BleConnectViewModel(
         bleManager.connectionState,
         bleManager.discoveredServices,
         bleManager.characteristicValues,
+        bleManager.notifyingCharacteristics,
         _uiState
-    ) { connectionState, services, characteristicValues, uiState ->
+    ) { connectionState, services, characteristicValues, notifyingCharacteristics, uiState ->
         uiState.copy(
             connectionState = connectionState,
             services = services,
-            characteristicValues = characteristicValues
+            characteristicValues = characteristicValues,
+            notifyingCharacteristics = notifyingCharacteristics
         )
     }.toStateFlow(uiScope, createUiState())
 
@@ -36,9 +38,11 @@ class BleConnectViewModel(
         connectionState = ConnectionState.DISCONNECTED,
         services = emptyList(),
         characteristicValues = emptyMap(),
+        notifyingCharacteristics = emptySet(),
         onConnectTrigger = ::connect,
         onDisconnectTrigger = ::disconnect,
-        onCharacteristicClick = ::readCharacteristic
+        onCharacteristicClick = ::readCharacteristic,
+        onCharacteristicNotifyToggle = ::setNotification
     )
 
     private fun connect() = bleManager.connect(deviceAddress)
@@ -47,6 +51,9 @@ class BleConnectViewModel(
 
     private fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID) =
         bleManager.readCharacteristic(serviceUuid, characteristicUuid)
+
+    private fun setNotification(serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) =
+        bleManager.setNotification(serviceUuid, characteristicUuid, isEnable)
 
     override fun onCleared() {
         bleManager.closeGatt()
