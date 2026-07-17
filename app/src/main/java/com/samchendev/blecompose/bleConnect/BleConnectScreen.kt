@@ -85,7 +85,13 @@ private fun BleConnectContent(
         }
 
         if (uiState.services.isNotEmpty()) {
-            ServicesList(uiState.services, uiState.characteristicValues, uiState.onCharacteristicClick)
+            ServicesList(
+                uiState.services,
+                uiState.characteristicValues,
+                uiState.notifyingCharacteristics,
+                uiState.onCharacteristicClick,
+                uiState.onCharacteristicNotifyToggle
+            )
         }
     }
 }
@@ -119,7 +125,9 @@ private fun RowScope.ConnectButton(onClick: () -> Unit, state: ConnectionState) 
 private fun ServicesList(
     services: List<GattService>,
     characteristicValues: Map<UUID, ByteArray>,
-    onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit
+    notifyingCharacteristics: Set<UUID>,
+    onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit,
+    onCharacteristicNotifyToggle: (serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -132,7 +140,13 @@ private fun ServicesList(
         }
 
         itemsIndexed(services) { index, service ->
-            ServiceItem(service, characteristicValues, onCharacteristicClick)
+            ServiceItem(
+                service,
+                characteristicValues,
+                notifyingCharacteristics,
+                onCharacteristicClick,
+                onCharacteristicNotifyToggle
+            )
 
             if (index < services.lastIndex) {
                 HorizontalDivider()
@@ -145,7 +159,9 @@ private fun ServicesList(
 private fun ServiceItem(
     service: GattService,
     characteristicValues: Map<UUID, ByteArray>,
-    onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit
+    notifyingCharacteristics: Set<UUID>,
+    onCharacteristicClick: (serviceUuid: UUID, characteristicUuid: UUID) -> Unit,
+    onCharacteristicNotifyToggle: (serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -159,7 +175,15 @@ private fun ServiceItem(
             CharacteristicItem(
                 characteristic = characteristic,
                 value = characteristicValues[characteristic.uuid],
-                onClick = { onCharacteristicClick(service.uuid, characteristic.uuid) }
+                isNotifying = notifyingCharacteristics.contains(characteristic.uuid),
+                onClick = { onCharacteristicClick(service.uuid, characteristic.uuid) },
+                onNotifyToggle = { isEnable ->
+                    onCharacteristicNotifyToggle(
+                        service.uuid,
+                        characteristic.uuid,
+                        isEnable
+                    )
+                }
             )
             Spacer(Modifier.height(0.dp))
         }
@@ -170,9 +194,12 @@ private fun ServiceItem(
 private fun CharacteristicItem(
     characteristic: GattCharacteristic,
     value: ByteArray?,
-    onClick: () -> Unit
+    isNotifying: Boolean,
+    onClick: () -> Unit,
+    onNotifyToggle: (isEnable: Boolean) -> Unit
 ) {
     val isReadable = characteristic.properties.contains("READ")
+    val isListenable = characteristic.properties.contains("NOTIFY") || characteristic.properties.contains("INDICATE")
 
     Card(
         onClick = onClick,
@@ -195,6 +222,14 @@ private fun CharacteristicItem(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            if (isListenable) {
+                Button(
+                    text = if (isNotifying) "Stop listening" else "Listen",
+                    onClick = { onNotifyToggle(!isNotifying) },
+                    modifier = Modifier.padding(top = 6.dp)
                 )
             }
         }
@@ -244,9 +279,11 @@ private fun BleConnectContentPreview() {
                 )
             ),
             characteristicValues = emptyMap(),
+            notifyingCharacteristics = emptySet(),
             onConnectTrigger = {},
             onDisconnectTrigger = {},
-            onCharacteristicClick = { _, _ -> }
+            onCharacteristicClick = { _, _ -> },
+            onCharacteristicNotifyToggle = { _, _, _ -> }
         ),
         onBack = {}
     )
