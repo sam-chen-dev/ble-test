@@ -37,7 +37,7 @@ import com.samchendev.blecompose.R
 import com.samchendev.blecompose.ble.ConnectionState
 import com.samchendev.blecompose.ble.GattCharacteristic
 import com.samchendev.blecompose.ble.GattService
-import com.samchendev.blecompose.ble.toBleUuid
+import com.samchendev.blecompose.ble.toBleId
 import com.samchendev.blecompose.ble.toDescriptiveText
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -153,7 +153,7 @@ private fun ServiceItem(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(service.uuid.toBleUuid().toDescriptiveText(), fontWeight = FontWeight.Medium, fontSize = 13.sp)
+        Text(service.uuid.toBleId().toDescriptiveText(), fontWeight = FontWeight.Medium, fontSize = 13.sp)
 
         service.characteristics.forEach { characteristic ->
             CharacteristicItem(
@@ -182,7 +182,7 @@ private fun CharacteristicItem(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
-            Text(characteristic.uuid.toBleUuid().toDescriptiveText(), fontSize = 12.sp)
+            Text(characteristic.uuid.toBleId().toDescriptiveText(), fontSize = 12.sp)
             Text(
                 characteristic.properties.joinToString(" · "),
                 fontSize = 11.sp,
