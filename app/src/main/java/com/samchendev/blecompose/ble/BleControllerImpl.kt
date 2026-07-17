@@ -6,12 +6,14 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.os.Build
 import androidx.annotation.RequiresPermission
 import java.util.UUID
 
@@ -19,6 +21,7 @@ class BleControllerImpl(context: Context) : BleController {
     companion object {
         //private const val TARGET_ADDRESS = "DD:88:00:00:09:3D"
         private const val TARGET_ADDRESS = "D0:AB:58:F0:29:DB"
+        private val CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
     }
 
     private val applicationContext = context.applicationContext
@@ -56,11 +59,11 @@ class BleControllerImpl(context: Context) : BleController {
         address: String,
         onConnectionStateChanged: (ConnectionState) -> Unit,
         onServicesDiscovered: (List<GattService>) -> Unit,
-        onCharacteristicRead: (UUID, ByteArray) -> Unit
+        onCharacteristicChanged: (UUID, ByteArray) -> Unit
     ) {
         val device = bleManager.adapter.getRemoteDevice(address)
 
-        gattCallback = createGattCallback(onConnectionStateChanged, onServicesDiscovered, onCharacteristicRead)
+        gattCallback = createGattCallback(onConnectionStateChanged, onServicesDiscovered, onCharacteristicChanged)
         gatt = device.connectGatt(applicationContext, false, gattCallback)
     }
 
@@ -80,7 +83,7 @@ class BleControllerImpl(context: Context) : BleController {
     private fun createGattCallback(
         onConnectionStateChanged: (ConnectionState) -> Unit,
         onServicesDiscovered: (List<GattService>) -> Unit,
-        onCharacteristicRead: (UUID, ByteArray) -> Unit
+        onCharacteristicChanged: (UUID, ByteArray) -> Unit
     ) = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             when (newState) {
@@ -108,7 +111,15 @@ class BleControllerImpl(context: Context) : BleController {
         ) {
             if (status != BluetoothGatt.GATT_SUCCESS) return
 
-            onCharacteristicRead(characteristic.uuid, value)
+            onCharacteristicChanged(characteristic.uuid, value)
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
+        ) {
+            onCharacteristicChanged(characteristic.uuid, value)
         }
     }
 
@@ -137,5 +148,28 @@ class BleControllerImpl(context: Context) : BleController {
         val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid) ?: return
 
         gatt?.readCharacteristic(characteristic)
+    }
+
+    /*Notifications*/
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun setNotification(serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) {
+        val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid) ?: return
+        val descriptor = characteristic.getDescriptor(CCCD_UUID) ?: return
+
+        gatt?.setCharacteristicNotification(characteristic, isEnable)
+
+        val isNotifyCapable = characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
+        val descriptorValue = when {
+            !isEnable -> BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+            isNotifyCapable -> BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            else -> BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            gatt?.writeDescriptor(descriptor, descriptorValue)
+        } else {
+            descriptor.value = descriptorValue
+            gatt?.writeDescriptor(descriptor)
+        }
     }
 }
