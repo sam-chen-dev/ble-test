@@ -44,12 +44,7 @@ class BleManager(private val bleController: BleController) {
         )
     }
 
-    fun disconnect() {
-        bleController.disconnect()
-
-        updateDiscoveredServices(emptyList())
-        _characteristicValues.update { emptyMap() }
-    }
+    fun disconnect() = bleController.disconnect()
 
     fun closeGatt() {
         bleController.closeGatt()
@@ -59,7 +54,14 @@ class BleManager(private val bleController: BleController) {
         _characteristicValues.update { emptyMap() }
     }
 
-    private fun updateConnectionState(newState: ConnectionState) = _connectionState.update { newState }
+    private fun updateConnectionState(newState: ConnectionState) {
+        if (newState == ConnectionState.DISCONNECTED) {
+            updateDiscoveredServices(emptyList())
+            _characteristicValues.update { emptyMap() }
+        }
+
+        _connectionState.update { newState }
+    }
 
     /*Discover Services*/
     private fun updateDiscoveredServices(services: List<GattService>) = _discoveredServices.update { services }
