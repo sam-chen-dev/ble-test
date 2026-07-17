@@ -1,6 +1,6 @@
 package com.samchendev.blecompose.ble
 
-enum class BleFeature(val uuid: String, val label: String) {
+enum class BleFeature(val id: String, val label: String) {
     GENERIC_ACCESS("0x1800", "Generic Access"),
     GENERIC_ATTRIBUTE("0x1801", "Generic Attribute"),
     DEVICE_INFORMATION("0x180A", "Device Information"),
