@@ -50,12 +50,15 @@ class BleManager(private val bleController: BleController) {
         _characteristicValues.update { emptyMap() }
     }
 
+    private fun updateConnectionState(newState: ConnectionState) = _connectionState.update { newState }
+
+    /*Discover Services*/
+    private fun updateDiscoveredServices(services: List<GattService>) = _discoveredServices.update { services }
+
     /*Read Characteristic*/
     fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID) =
         bleController.readCharacteristic(serviceUuid, characteristicUuid)
 
-    private fun updateConnectionState(newState: ConnectionState) = _connectionState.update { newState }
-    private fun updateDiscoveredServices(services: List<GattService>) = _discoveredServices.update { services }
     private fun updateCharacteristicValue(uuid: UUID, value: ByteArray) =
         _characteristicValues.update { it + (uuid to value) }
 }
