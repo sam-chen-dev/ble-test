@@ -11,11 +11,13 @@ class BleManager(private val bleController: BleController) {
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     private val _discoveredServices = MutableStateFlow<List<GattService>>(emptyList())
     private val _characteristicValues = MutableStateFlow<Map<UUID, ByteArray>>(emptyMap())
+    private val _notifyingCharacteristics = MutableStateFlow<Set<UUID>>(emptySet())
 
     val scannedDevices = _scannedDevices.asStateFlow()
     val connectionState = _connectionState.asStateFlow()
     val discoveredServices = _discoveredServices.asStateFlow()
     val characteristicValues = _characteristicValues.asStateFlow()
+    val notifyingCharacteristics = _notifyingCharacteristics.asStateFlow()
 
     /*Scan*/
     fun startScan() {
@@ -40,7 +42,7 @@ class BleManager(private val bleController: BleController) {
             address = address,
             onConnectionStateChanged = { state -> updateConnectionState(state) },
             onServicesDiscovered = { services -> updateDiscoveredServices(services) },
-            onCharacteristicRead = { uuid, value -> updateCharacteristicValue(uuid, value) }
+            onCharacteristicChanged = { uuid, value -> updateCharacteristicValue(uuid, value) }
         )
     }
 
@@ -52,12 +54,14 @@ class BleManager(private val bleController: BleController) {
         updateConnectionState(ConnectionState.DISCONNECTED)
         updateDiscoveredServices(emptyList())
         _characteristicValues.update { emptyMap() }
+        _notifyingCharacteristics.update { emptySet() }
     }
 
     private fun updateConnectionState(newState: ConnectionState) {
         if (newState == ConnectionState.DISCONNECTED) {
             updateDiscoveredServices(emptyList())
             _characteristicValues.update { emptyMap() }
+            _notifyingCharacteristics.update { emptySet() }
         }
 
         _connectionState.update { newState }
@@ -72,4 +76,16 @@ class BleManager(private val bleController: BleController) {
 
     private fun updateCharacteristicValue(uuid: UUID, value: ByteArray) =
         _characteristicValues.update { it + (uuid to value) }
+
+    /*Notifications*/
+    fun setNotification(serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) {
+        bleController.setNotification(serviceUuid, characteristicUuid, isEnable)
+
+        updateNotifyingCharacteristics(characteristicUuid, isEnable)
+    }
+
+    private fun updateNotifyingCharacteristics(characteristicUuid: UUID, isEnable: Boolean) =
+        _notifyingCharacteristics.update {
+            if (isEnable) it + characteristicUuid else it - characteristicUuid
+        }
 }
