@@ -20,7 +20,7 @@ import java.util.UUID
 class BleControllerImpl(context: Context) : BleController {
     companion object {
         //private const val TARGET_ADDRESS = "DD:88:00:00:09:3D"
-        private const val TARGET_ADDRESS = "D0:AB:58:F0:29:DB"
+        //private const val TARGET_ADDRESS = "D0:AB:58:F0:29:DB"
         private val CCCD_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
     }
 
@@ -44,7 +44,7 @@ class BleControllerImpl(context: Context) : BleController {
 
     private fun createScanCallback(onDeviceFound: (BluetoothDevice) -> Unit) = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
-            if (result.device.address != TARGET_ADDRESS) return
+            //if (result.device.address != TARGET_ADDRESS) return
 
             onDeviceFound(result.device)
         }
