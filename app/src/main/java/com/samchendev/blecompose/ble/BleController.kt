@@ -12,7 +12,7 @@ interface BleController {
         address: String,
         onConnectionStateChanged: (ConnectionState) -> Unit,
         onServicesDiscovered: (List<GattService>) -> Unit,
-        onCharacteristicRead: (UUID, ByteArray) -> Unit
+        onCharacteristicChanged: (UUID, ByteArray) -> Unit
     )
 
     fun disconnect()
@@ -20,4 +20,6 @@ interface BleController {
     fun closeGatt()
 
     fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID)
+
+    fun setNotification(serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean)
 }
