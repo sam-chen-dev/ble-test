@@ -18,7 +18,11 @@ class BleManager(private val bleController: BleController) {
     val characteristicValues = _characteristicValues.asStateFlow()
 
     /*Scan*/
-    fun startScan() = bleController.startScan { device -> updateScannedDevices(device) }
+    fun startScan() {
+        _scannedDevices.update { emptyList() }
+
+        bleController.startScan { device -> updateScannedDevices(device) }
+    }
 
     fun stopScan() = bleController.stopScan()
 
