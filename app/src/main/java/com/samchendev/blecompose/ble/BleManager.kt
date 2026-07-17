@@ -44,7 +44,12 @@ class BleManager(private val bleController: BleController) {
         )
     }
 
-    fun disconnect() = bleController.disconnect()
+    fun disconnect() {
+        bleController.disconnect()
+
+        updateDiscoveredServices(emptyList())
+        _characteristicValues.update { emptyMap() }
+    }
 
     fun closeGatt() {
         bleController.closeGatt()
