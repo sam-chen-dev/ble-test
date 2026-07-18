@@ -1,5 +1,6 @@
 package com.samchendev.blecompose.bleConnect
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.utlikotlin.toStateFlow
@@ -42,7 +43,8 @@ class BleConnectViewModel(
         onConnectTrigger = ::connect,
         onDisconnectTrigger = ::disconnect,
         onCharacteristicClick = ::readCharacteristic,
-        onCharacteristicNotifyToggle = ::setNotification
+        onCharacteristicNotifyToggle = ::setNotification,
+        onTextSubmit = ::writeText
     )
 
     private fun connect() = bleManager.connect(deviceAddress)
@@ -54,6 +56,10 @@ class BleConnectViewModel(
 
     private fun setNotification(serviceUuid: UUID, characteristicUuid: UUID, isEnable: Boolean) =
         bleManager.setNotification(serviceUuid, characteristicUuid, isEnable)
+
+    private fun writeText(text: String) {
+        Log.d("writeText()", "text: $text")
+    }
 
     override fun onCleared() {
         bleManager.closeGatt()
