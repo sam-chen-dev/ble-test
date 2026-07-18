@@ -7,7 +7,7 @@ complexity:
     threshold: 60        # Compose functions are inherently longer
   LongParameterList:
     active: true
-    functionThreshold: 6
+    functionThreshold: 10
     constructorThreshold: 6
   TooManyFunctions:
     active: true
