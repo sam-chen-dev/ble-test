@@ -6,6 +6,12 @@ data class GattCharacteristic(
     val uuid: UUID,
     val properties: List<String>
 ) {
+    fun isReadable() = properties.contains("READ")
+
+    fun isListenable() = properties.contains("NOTIFY") || properties.contains("INDICATE")
+
+    fun isWritable() = properties.contains("WRITE")
+
     fun getFormattedValue(value: ByteArray) = when (uuid.toBleId()) {
         BleFeature.DEVICE_NAME.id -> value.toText()
         BleFeature.MANUFACTURER_NAME_STRING.id -> value.toText()
