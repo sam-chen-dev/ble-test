@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">BLE Compose</string>
+
+    <string name="ok">OK</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+
 </resources>
