@@ -19,6 +19,7 @@ data class GattCharacteristic(
         BleFeature.HARDWARE_REVISION_STRING.id -> value.toText()
         BleFeature.FIRMWARE_REVISION_STRING.id -> value.toText()
         BleFeature.CELSIUS.id -> "${value.toFloat()}°C"
+        BleFeature.WRITE_TEXT.id -> value.toText()
         else -> value.toHexString()
     }
 }

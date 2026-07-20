@@ -20,5 +20,7 @@ enum class BleFeature(val id: String, val label: String) {
     CUSTOM_CHARACTERISTIC_FEA3("0xFEA3", "Custom Characteristic (0xFEA3)"),
     NORDIC_SECURE_DFU("0xFE59", "Nordic Secure Device Firmware Update"),
     TEMPERATURE("0x180C", "Temperature"),
-    CELSIUS("0x2A6E", "Celsius")
+    CELSIUS("0x2A6E", "Celsius"),
+    INPUT_TEST("0x181C", "Input Test"),
+    WRITE_TEXT("0x2A6F", "Write Text")
 }
